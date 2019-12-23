@@ -1,21 +1,41 @@
 import React, { Component } from 'react';
 
 class Search extends Component {
-  state = { packageQuery: '', source: '', os: '', arch: '' };
-
-  sources = [{ id: 'yum', name: 'YUM' }];
-  operatingSystems = [{ id: 'el7', name: 'RHEL/CentOS 7' }];
-  architectures = [
-    { id: 'x86_64', name: 'x86_64' },
-    { id: 'i686', name: 'i686' },
-  ];
+  state = {
+    packageQuery: '',
+    selectedSource: '', selectedOS: '', selectedArch: '',
+    sources: {}, operatingSystems: {}, architectures: {}
+  };
 
   componentDidMount() {
-    this.setState({
-      source: this.sources[0].id,
-      os: this.operatingSystems[0].id,
-      arch: this.architectures[0].id,
-    });
+    this.reloadSources();
+  }
+
+  reloadSources() {
+    const sources = this.props.sources;
+    const selectedSource = Object.keys(sources)[0];
+
+    if (!sources.hasOwnProperty(selectedSource)) {
+      return;
+    }
+
+    const operatingSystems = sources[selectedSource].operatingSystems;
+    const selectedOS = Object.keys(operatingSystems)[0];
+
+    if (!operatingSystems.hasOwnProperty(selectedOS)) {
+      return;
+    }
+
+    const architectures = operatingSystems[selectedOS].architectures;
+    const selectedArch = Object.keys(architectures)[0];
+
+    this.setState({ sources, selectedSource, operatingSystems, selectedOS, architectures, selectedArch });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.sources !== this.state.sources) {
+      this.reloadSources();
+    }
   }
 
   updatePackageQuery = event => {
@@ -23,15 +43,15 @@ class Search extends Component {
   };
 
   updateSource = event => {
-    this.setState({ source: event.target.value });
+    this.setState({ selectedSource: event.target.value });
   };
 
   updateOS = event => {
-    this.setState({ os: event.target.value });
+    this.setState({ selectedOS: event.target.value });
   };
 
   updateArch = event => {
-    this.setState({ arch: event.target.value });
+    this.setState({ selectedArch: event.target.value });
   };
 
   handleKeyPress = event => {
@@ -41,7 +61,7 @@ class Search extends Component {
   };
 
   searchPackage = () => {
-    this.props.searchPackage(this.state.packageQuery, this.state.source, this.state.os, this.state.arch);
+    this.props.searchPackage(this.state.packageQuery, this.state.selectedSource, this.state.selectedOS, this.state.selectedArch);
   };
 
   render() {
@@ -64,7 +84,7 @@ class Search extends Component {
                 style={otherInputsStyle}
                 onChange={this.updateSource}>
           {
-            this.sources.map(option => (<option value={option.id} key={option.id}>{option.name}</option>))
+            Object.keys(this.state.sources).map((key, index, array) => (<option value={key} key={key}>{this.state.sources[key].name}</option>))
           }
         </select>
 
@@ -73,7 +93,7 @@ class Search extends Component {
                 style={otherInputsStyle}
                 onChange={this.updateOS}>
           {
-            this.operatingSystems.map(option => (<option value={option.id} key={option.id}>{option.name}</option>))
+            Object.keys(this.state.operatingSystems).map((key, index, array) => (<option value={key} key={key}>{this.state.operatingSystems[key].name}</option>))
           }
         </select>
 
@@ -81,7 +101,7 @@ class Search extends Component {
                 style={otherInputsStyle}
                 onChange={this.updateArch}>
           {
-            this.architectures.map(option => (<option value={option.id} key={option.id}>{option.name}</option>))
+            Object.keys(this.state.architectures).map((key, index, array) => (<option value={key} key={key}>{this.state.architectures[key].name}</option>))
           }
         </select>
 
