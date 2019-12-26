@@ -12,6 +12,7 @@ class App extends Component {
     sources: {},
     search: {isLoading: false, searchResults: []},
     download: { requestId: null, isReady: false,},
+    nevraStringToSpec : {},
   };
 
   componentDidMount() {
@@ -24,22 +25,47 @@ class App extends Component {
       .then(json => this.setState({sources: json}));
   }
 
+  convertResultsToMapping(results, originalSpec) {
+    console.log(results);
+
+    return results.reduce((map, result) => {
+      console.log(result);
+
+      map[result.nevraString] = {
+        ...originalSpec,
+        packages: [result.nevraString],
+      };
+
+      console.log(map);
+      return map;
+    }, {});
+  }
+
   searchPackage = (packageQuery, source, os, architecture) => {
     this.setState({ search: { ...this.state.search, isLoading: true } });
+
+    const downloadSpec = {
+      source,
+      os,
+      architecture,
+      "packages": [
+        packageQuery
+      ]
+    };
+
     fetch(`${API_ADDRESS}/search`, {
       method: 'post',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        source,
-        os,
-        architecture,
-        "packages": [
-          packageQuery
-        ]
-      }),
+      body: JSON.stringify(downloadSpec),
     }).then(response => response.json())
-      .then(json => this.setState({ search: { ...this.state.search, searchResults: json } }))
-      .then(() => this.setState({ search: { ...this.state.search, isLoading: false } }));
+      .then(results => this.setState({
+        search: { ...this.state.search, searchResults: results, isLoading: false },
+        nevraStringToSpec: { ...this.state.nevraStringToSpec, ...this.convertResultsToMapping(results, downloadSpec) },
+      }));
+  };
+
+  downloadPackage = () => {
+
   };
 
   render() {
@@ -47,7 +73,9 @@ class App extends Component {
       <div className="App">
         <img src={logo} className="App-logo" alt="logo" />
         <Search sources={this.state.sources} searchPackage={this.searchPackage} />
-        <SearchResults results={this.state.search.searchResults} isLoading={this.state.search.isLoading} />
+        <SearchResults results={this.state.search.searchResults}
+                       isLoading={this.state.search.isLoading}
+                       downloadPackage={this.downloadPackage} />
       </div>
     );
   }

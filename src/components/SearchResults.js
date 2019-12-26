@@ -4,12 +4,15 @@ const SearchResults = props => {
   return props.isLoading ? (
     <div>LOADING</div>
   ) : (
-    <div className="centered-flexbox">
+    <div className="centered-flex-box">
       {
         props.results.map(result => (
-          <div key={result.nevraString}>
+          <div key={result.nevraString} className="centered-flex-box search-result-box">
             <span className="package-name" style={{flexGrow: 3}}>{result.nevraString}</span>
-            <span className="download-button">Download btn</span>
+            <div className="download-button">
+              <button className="btn btn-secondary">Download</button>
+            </div>
+
           </div>
         ))
       }
