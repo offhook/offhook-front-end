@@ -65,12 +65,11 @@ class Search extends Component {
   };
 
   render() {
-    const containerStyle = {display: 'flex', justifyContent: 'center'};
     const otherInputsStyle = {flexGrow: 0.2};
     const otherLabelsStyle = {flexGrow: 0.05};
 
     return (
-      <div className="input-group" style={containerStyle}>
+      <div className="Search input-group centered-flexbox">
 
         <input type="text"
                className="form-control"

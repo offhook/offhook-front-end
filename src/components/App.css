@@ -15,7 +15,6 @@ body {
 .App-logo {
   width: 50%;
   pointer-events: none;
-  padding-bottom: 5vh;
 }
 
 .App-header {
@@ -33,11 +32,15 @@ body {
   color: #61dafb;
 }
 
-.page-content {
+.centered-flexbox {
   display: flex;
   justify-content: center;
 }
 
 .input-group-text {
   text-align: center;
+}
+
+.Search {
+  padding: 5vh 0;
 }
