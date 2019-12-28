@@ -2,7 +2,10 @@ import React from 'react';
 
 const SearchResults = props => {
   return props.isLoading ? (
-    <div>LOADING</div>
+    <div>
+      <span className="spinner-border spinner-border-sm search-spinner" role="status" aria-hidden="true"></span>
+      Searching...
+    </div>
   ) : (
     <div className="centered-flex-box">
       {

@@ -58,3 +58,7 @@ body {
 .search-result-box {
   width: 55%;
 }
+
+.search-spinner {
+  margin: 5px;
+}
