@@ -5,7 +5,7 @@ import { SearchResult } from './SearchResults';
 import logo from '../logo-full-size.png';
 
 const API_URI = process.env.REACT_APP_API_URI;
-const STATUS_UPDATE_INTERVAL_MILLIS = 5000;
+const STATUS_UPDATE_INTERVAL_MILLIS = 1000;
 
 class App extends Component {
 
