@@ -6,7 +6,6 @@ import logo from '../logo-full-size.png';
 
 const API_URI = process.env.REACT_APP_API_URI;
 const STATUS_UPDATE_INTERVAL_MILLIS = 5000;
-const CONTENT_DISPOSITION_FILENAME_RE = new RegExp(/.*filename="(.*)"/gm);
 
 class App extends Component {
 
@@ -78,7 +77,8 @@ class App extends Component {
             The workaround is to add a hidden form and submit it behind the scenes to get the browser to trigger the Save dialog.
         */
         const contentDispositionHeader = response.headers.get('Content-Disposition');
-        const fileName = CONTENT_DISPOSITION_FILENAME_RE.exec(contentDispositionHeader)[1];
+        const contentDispositionFilenameRE = new RegExp(/.*filename="(.*)"/gm);
+        const fileName = contentDispositionFilenameRE.exec(contentDispositionHeader)[1];
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
