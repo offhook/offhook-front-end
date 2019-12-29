@@ -5,6 +5,8 @@ import { SearchResult } from './SearchResults';
 import logo from '../logo-full-size.png';
 
 const API_ADDRESS = 'http://localhost:8080';
+const STATUS_UPDATE_INTERVAL_MILLIS = 5000;
+const CONTENT_DISPOSITION_FILENAME_RE = new RegExp(/.*filename="(.*)"/gm);
 
 class App extends Component {
 
@@ -13,6 +15,8 @@ class App extends Component {
     search: {isLoading: false, searchResults: []},
     download: { requestId: null, isReady: false,},
     nevraStringToSpec : {},
+    nevraStringToRequestId : {},
+    requestsData: {},
   };
 
   componentDidMount() {
@@ -26,17 +30,13 @@ class App extends Component {
   }
 
   convertResultsToMapping(results, originalSpec) {
-    console.log(results);
 
     return results.reduce((map, result) => {
-      console.log(result);
-
       map[result.nevraString] = {
         ...originalSpec,
         packages: [result.nevraString],
       };
 
-      console.log(map);
       return map;
     }, {});
   }
@@ -64,8 +64,66 @@ class App extends Component {
       }));
   };
 
-  downloadPackage = () => {
+  downloadFiles = (nevraString) => {
+    const requestId = this.state.nevraStringToRequestId[nevraString];
+    this.downloadFilesByRequestId(requestId);
+  };
 
+
+  downloadFilesByRequestId = (requestId) => {
+    fetch(`${API_ADDRESS}/download/${requestId}/files`, )
+      .then(async (response) => {
+        /*
+          Browser technology currently doesn't support downloading a file directly from an Ajax request.
+            The workaround is to add a hidden form and submit it behind the scenes to get the browser to trigger the Save dialog.
+        */
+        const contentDispositionHeader = response.headers.get('Content-Disposition');
+        const fileName = CONTENT_DISPOSITION_FILENAME_RE.exec(contentDispositionHeader)[1];
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+  };
+
+  submitRequest = (nevraString) => {
+    const spec = this.state.nevraStringToSpec[nevraString];
+    const reqBody = { spec };
+    fetch(`${API_ADDRESS}/download`, {
+      method: 'post',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(reqBody),
+    }).then(response => response.json())
+      .then(({id, status, is_consumable}) => {
+        const isReady = is_consumable;
+        this.setState({
+          nevraStringToRequestId: { ...this.state.nevraStringToRequestId, [nevraString]: id },
+          requestsData: { ...this.state.requestsData, [id]: { status, isReady } },
+        });
+
+        setTimeout(() => this.updateStatus(id), STATUS_UPDATE_INTERVAL_MILLIS);
+      });
+  };
+
+  updateStatus = requestId => {
+    fetch(`${API_ADDRESS}/download/${requestId}`)
+      .then(response => response.json())
+      .then(({id, status, is_consumable}) => {
+        const isReady = is_consumable;
+        this.setState({
+          requestsData: {...this.state.requestsData, [id]: {status, isReady}},
+        });
+
+        if (isReady) {
+          this.downloadFilesByRequestId(requestId);
+        } else {
+          setTimeout(() => this.updateStatus(requestId), STATUS_UPDATE_INTERVAL_MILLIS);
+        }
+      });
   };
 
   render() {
@@ -82,14 +140,18 @@ class App extends Component {
           ) : (
             <div className="centered-flex-box">
               {
-                this.state.search.searchResults.map(result => (
-                  <SearchResult key={result.nevraString}
-                                nevraString={result.nevraString}
-                                downloadPackage={this.downloadPackage}
-                                submittedRequest={false}
-                                status={''}
-                                isReady={false} />
-                ))
+                this.state.search.searchResults.map(({nevraString}) => {
+                  const requestId = this.state.nevraStringToRequestId[nevraString];
+                  return (
+                    <SearchResult key={nevraString}
+                                  nevraString={nevraString}
+                                  submittedRequest={requestId !== undefined}
+                                  status={requestId ? this.state.requestsData[requestId].status : ''}
+                                  isReady={requestId ? this.state.requestsData[requestId].isReady : false}
+                                  downloadFiles={this.downloadFiles}
+                                  submitRequest={this.submitRequest} />
+                  )
+                })
               }
             </div>
           )
