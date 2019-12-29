@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Search from './Search';
-import SearchResults from './SearchResults';
+import { SearchResult } from './SearchResults';
 import logo from '../logo-full-size.png';
 
 const API_ADDRESS = 'http://localhost:8080';
@@ -73,9 +73,27 @@ class App extends Component {
       <div className="App">
         <img src={logo} className="App-logo" alt="logo" />
         <Search sources={this.state.sources} searchPackage={this.searchPackage} />
-        <SearchResults results={this.state.search.searchResults}
-                       isLoading={this.state.search.isLoading}
-                       downloadPackage={this.downloadPackage} />
+        {
+          this.state.search.isLoading ? (
+            <div>
+              <span className="spinner-border spinner-border-sm search-spinner" role="status" aria-hidden="true"></span>
+              Searching...
+            </div>
+          ) : (
+            <div className="centered-flex-box">
+              {
+                this.state.search.searchResults.map(result => (
+                  <SearchResult key={result.nevraString}
+                                nevraString={result.nevraString}
+                                downloadPackage={this.downloadPackage}
+                                submittedRequest={false}
+                                status={''}
+                                isReady={false} />
+                ))
+              }
+            </div>
+          )
+        }
       </div>
     );
   }

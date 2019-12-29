@@ -62,3 +62,7 @@ body {
 .search-spinner {
   margin: 5px;
 }
+
+.request-process-spinner {
+  margin-right: 5px;
+}
