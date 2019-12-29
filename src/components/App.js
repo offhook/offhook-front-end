@@ -14,8 +14,8 @@ class App extends Component {
     sources: {},
     search: {isLoading: false, searchResults: []},
     download: { requestId: null, isReady: false,},
-    nevraStringToSpec : {},
-    nevraStringToRequestId : {},
+    fullNameToSpec : {},
+    fullNameToRequestId : {},
     requestsData: {},
   };
 
@@ -32,9 +32,9 @@ class App extends Component {
   convertResultsToMapping(results, originalSpec) {
 
     return results.reduce((map, result) => {
-      map[result.nevraString] = {
+      map[result.fullName] = {
         ...originalSpec,
-        packages: [result.nevraString],
+        packages: [result.fullName],
       };
 
       return map;
@@ -60,12 +60,12 @@ class App extends Component {
     }).then(response => response.json())
       .then(results => this.setState({
         search: { ...this.state.search, searchResults: results, isLoading: false },
-        nevraStringToSpec: { ...this.state.nevraStringToSpec, ...this.convertResultsToMapping(results, downloadSpec) },
+        fullNameToSpec: { ...this.state.fullNameToSpec, ...this.convertResultsToMapping(results, downloadSpec) },
       }));
   };
 
-  downloadFiles = (nevraString) => {
-    const requestId = this.state.nevraStringToRequestId[nevraString];
+  downloadFiles = (fullName) => {
+    const requestId = this.state.fullNameToRequestId[fullName];
     this.downloadFilesByRequestId(requestId);
   };
 
@@ -90,8 +90,8 @@ class App extends Component {
       });
   };
 
-  submitRequest = (nevraString) => {
-    const spec = this.state.nevraStringToSpec[nevraString];
+  submitRequest = (fullName) => {
+    const spec = this.state.fullNameToSpec[fullName];
     const reqBody = { spec };
     fetch(`${API_ADDRESS}/download`, {
       method: 'post',
@@ -101,7 +101,7 @@ class App extends Component {
       .then(({id, status, is_consumable}) => {
         const isReady = is_consumable;
         this.setState({
-          nevraStringToRequestId: { ...this.state.nevraStringToRequestId, [nevraString]: id },
+          fullNameToRequestId: { ...this.state.fullNameToRequestId, [fullName]: id },
           requestsData: { ...this.state.requestsData, [id]: { status, isReady } },
         });
 
@@ -140,11 +140,11 @@ class App extends Component {
           ) : (
             <div className="centered-flex-box">
               {
-                this.state.search.searchResults.map(({nevraString}) => {
-                  const requestId = this.state.nevraStringToRequestId[nevraString];
+                this.state.search.searchResults.map(({fullName}) => {
+                  const requestId = this.state.fullNameToRequestId[fullName];
                   return (
-                    <SearchResult key={nevraString}
-                                  nevraString={nevraString}
+                    <SearchResult key={fullName}
+                                  fullName={fullName}
                                   submittedRequest={requestId !== undefined}
                                   status={requestId ? this.state.requestsData[requestId].status : ''}
                                   isReady={requestId ? this.state.requestsData[requestId].isReady : false}
