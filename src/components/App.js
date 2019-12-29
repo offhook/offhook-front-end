@@ -4,7 +4,7 @@ import Search from './Search';
 import { SearchResult } from './SearchResults';
 import logo from '../logo-full-size.png';
 
-const API_ADDRESS = 'http://localhost:8080';
+const API_URI = process.env.REACT_APP_API_URI;
 const STATUS_UPDATE_INTERVAL_MILLIS = 5000;
 const CONTENT_DISPOSITION_FILENAME_RE = new RegExp(/.*filename="(.*)"/gm);
 
@@ -24,7 +24,7 @@ class App extends Component {
   }
 
   fetchSupportedSources() {
-    fetch(`${API_ADDRESS}/sources`)
+    fetch(`${API_URI}/sources`)
       .then(response => response.json())
       .then(json => this.setState({sources: json}));
   }
@@ -53,7 +53,7 @@ class App extends Component {
       ]
     };
 
-    fetch(`${API_ADDRESS}/search`, {
+    fetch(`${API_URI}/search`, {
       method: 'post',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(downloadSpec),
@@ -71,7 +71,7 @@ class App extends Component {
 
 
   downloadFilesByRequestId = (requestId) => {
-    fetch(`${API_ADDRESS}/download/${requestId}/files`, )
+    fetch(`${API_URI}/download/${requestId}/files`, )
       .then(async (response) => {
         /*
           Browser technology currently doesn't support downloading a file directly from an Ajax request.
@@ -93,7 +93,7 @@ class App extends Component {
   submitRequest = (fullName) => {
     const spec = this.state.fullNameToSpec[fullName];
     const reqBody = { spec };
-    fetch(`${API_ADDRESS}/download`, {
+    fetch(`${API_URI}/download`, {
       method: 'post',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(reqBody),
@@ -110,7 +110,7 @@ class App extends Component {
   };
 
   updateStatus = requestId => {
-    fetch(`${API_ADDRESS}/download/${requestId}`)
+    fetch(`${API_URI}/download/${requestId}`)
       .then(response => response.json())
       .then(({id, status, is_consumable}) => {
         const isReady = is_consumable;
