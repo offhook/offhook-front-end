@@ -16,7 +16,7 @@ const SearchResult = ({submittedRequest, isReady, status, fullName, downloadFile
 
   return (
     <div key={fullName} className="centered-flex-box search-result-box">
-      <span className="package-name" style={{flexGrow: 3}}>{fullName}</span>
+      <span className="package-name">{fullName}</span>
       <div className="download-button">
         <button className={"btn btn-primary"}
                 disabled={isRequestProcessing}

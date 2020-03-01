@@ -138,7 +138,7 @@ class App extends Component {
               Searching...
             </div>
           ) : (
-            <div className="centered-flex-box">
+            <div className="centered-flex-box search-results-container">
               {
                 this.state.search.searchResults.map(({fullName}) => {
                   const requestId = this.state.fullNameToRequestId[fullName];
