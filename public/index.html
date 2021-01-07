@@ -21,7 +21,21 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+
+    <!-- START: The block is just a banner to inform about offhook.dev shutting down. It may be removed after the shutdown -->
+    <div class="banner fixed-top col-md-12 bg-light border-dark border-bottom text-center">
+      <h6 class="my-1">
+        On January 30th, 2021, <i>offhook.dev</i> will be shut down.
+        Feel free to use locally or deploy as you wish, <a href="https://github.com/offhook?type=source">here</a>'s the source code.
+      </h6>
+    </div>
+    <!-- END: The block is just a banner to inform about offhook.dev shutting down. It may be removed after the shutdown -->
+
+    <!--
+      NOTE: the root element has class .pt-2 only to keep it in place with the banner above.
+      It should be removed when the banner is removed.
+    -->
+    <div class="pt-2" id="root"></div>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
